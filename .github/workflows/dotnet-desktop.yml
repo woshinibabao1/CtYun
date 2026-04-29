@@ -7,24 +7,24 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      # 1. 拉代码
+      # 1. 拉取代码
       - uses: actions/checkout@v4
 
-      # 2. 装.NET环境
+      # 2. 安装.NET 8环境
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
-      # 3. 直接编译 Linux x64 单文件（无版本，最简）
+      # 3. 编译Linux x64（删除冲突的PublishSingleFile，适配AOT）
       - name: Compile Linux x64
-        run: dotnet publish CtYun/CtYun.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o ./release
+        run: dotnet publish CtYun/CtYun.csproj -c Release -r linux-x64 --self-contained true -o ./release
 
-      # 4. 直接打包
+      # 4. 打包编译产物
       - name: Package
         run: tar -zcvf CtYun-Linux.tar.gz release/
 
-      # 5. 上传下载
+      # 5. 上传产物（可直接下载）
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
