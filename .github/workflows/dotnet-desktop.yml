@@ -1,57 +1,32 @@
-name: Build Linux Release
-
+name: Build Linux
 on:
   push:
-    branches: [ "master" ]
-  pull_request:
     branches: [ "master" ]
 
 jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # 1. 拉代码
+      - uses: actions/checkout@v4
 
+      # 2. 装.NET环境
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
-      # 读取版本号
-      - name: Get Version
-        run: |
-          version=$(grep -oP '(?<=<FileVersion>).*?(?=</FileVersion>)' CtYun/CtYun.csproj)
-          echo "VERSION=$version" >> $GITHUB_ENV
+      # 3. 直接编译 Linux x64 单文件（无版本，最简）
+      - name: Compile Linux x64
+        run: dotnet publish CtYun/CtYun.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o ./release
 
-      # 编译 Linux x64 独立包
-      - name: Publish Linux x64
-        run: |
-          dotnet publish CtYun/CtYun.csproj \
-            -c Release \
-            -r linux-x64 \
-            --self-contained true \
-            -p:PublishSingleFile=true \
-            -o ./release/linux-x64
+      # 4. 直接打包
+      - name: Package
+        run: tar -zcvf CtYun-Linux.tar.gz release/
 
-      # 编译 Linux arm64 独立包
-      - name: Publish Linux arm64
-        run: |
-          dotnet publish CtYun/CtYun.csproj \
-            -c Release \
-            -r linux-arm64 \
-            --self-contained true \
-            -p:PublishSingleFile=true \
-            -o ./release/linux-arm64
-
-      # 打包成品为压缩包
-      - name: Archive Release
-        run: |
-          tar -zcvf CtYun-Linux-${{ env.VERSION }}.tar.gz release/
-
-      # 上传到 GitHub 产物，可直接下载
-      - name: Upload Artifact
+      # 5. 上传下载
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: CtYun-Linux-${{ env.VERSION }}
-          path: CtYun-Linux-${{ env.VERSION }}.tar.gz
+          name: CtYun-Linux
+          path: CtYun-Linux.tar.gz
