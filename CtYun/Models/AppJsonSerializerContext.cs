@@ -10,6 +10,7 @@ namespace CtYun
 {
     //Aot编译需要
     [JsonSerializable(typeof(ConnecMessage))]
+    [JsonSerializable(typeof(AppConfig))]
 
     [JsonSerializable(typeof(ResultBase<ChallengeData>))]
     [JsonSerializable(typeof(ResultBase<ClientInfo>))]
